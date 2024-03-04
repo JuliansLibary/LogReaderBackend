@@ -136,5 +136,38 @@ namespace LogReaderBackend.Models
             return $"{base.ToString()}, Request Message: {RequestMessage}";
         }
     }
-  
+    public class PostAccessContent : AccessContent
+    {
+        public int Counter { get; set; }
+
+        public PostAccessContent(string sid, string requestContent, string requestType, int counter)
+            : base(sid, requestContent, requestType)
+        {
+            Counter = counter;
+        }
+
+        public PostAccessContent(string requestContent, string requestType, int counter)
+            : base(requestContent, requestType)
+        {
+            Counter = counter;
+        }
+    }
+    public class PostErrorContent : ErrorContent
+    {
+        public int Counter { get; set; }
+
+        public PostErrorContent(string sid, string requestContent, string requestMessage, int counter)
+            : base(sid, requestContent, requestMessage)
+        {
+            Counter = counter;
+        }
+
+        public PostErrorContent(string requestContent, string requestMessage, int counter)
+            : base(requestContent, requestMessage)
+        {
+            Counter = counter;
+        }
+    }
+    // ganantiert, dass das Property, welches gechanged wurde immer im UI aktuell bleibt
+
 }
