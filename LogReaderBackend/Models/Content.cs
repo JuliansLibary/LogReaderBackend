@@ -54,17 +54,20 @@ namespace LogReaderBackend.Models
     // Abgeleitete Klasse AccessContent, die von Content erbt und das Attribut RequestType hinzufügt
     public class AccessContent : Content
     {
+        public string NodeId { get; set; }
         public string RequestType { get; set; }
 
-        public AccessContent(string sid, string requestContent, string requestType)
+        public AccessContent(string sid, string requestContent, string requestType, string nodeId)
             : base(sid, requestContent) // Aufruf des Basisklassenkonstruktors
         {
             RequestType = requestType;
+            this.NodeId = nodeId;
         }
-        public AccessContent(string requestContent, string requestType)
+        public AccessContent(string requestContent, string requestType, string nodeId)
     : base(requestContent) // Aufruf des Basisklassenkonstruktors
         {
             RequestType = requestType;
+            this.NodeId = nodeId;
         }
         public AccessContent() : base()
         {
@@ -140,14 +143,14 @@ namespace LogReaderBackend.Models
     {
         public int Counter { get; set; }
 
-        public PostAccessContent(string sid, string requestContent, string requestType, int counter)
-            : base(sid, requestContent, requestType)
+        public PostAccessContent(string sid, string requestContent, string requestType,string nodeId,  int counter)
+            : base(sid, requestContent, requestType, nodeId)
         {
             Counter = counter;
         }
 
-        public PostAccessContent(string requestContent, string requestType, int counter)
-            : base(requestContent, requestType)
+        public PostAccessContent(string requestContent, string requestType, string nodeId, int counter)
+            : base(requestContent, requestType, nodeId)
         {
             Counter = counter;
         }

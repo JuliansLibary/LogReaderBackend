@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using LogReaderBackend.Services; // Stellen Sie sicher, dass der Namespace korrekt ist
 using Newtonsoft.Json;
-using LogReaderBackend.Models;
+using LiteDB;
 
 namespace LogReaderBackend.Controllers
 {
@@ -18,8 +16,56 @@ namespace LogReaderBackend.Controllers
             _logProcessingService = logProcessingService;
         }
 
+        private readonly string _dbPath = Path.Combine(Environment.CurrentDirectory, "AppData.db");
+
+        public class AppState
+        {
+            public int Id { get; set; } 
+            public string SessionId { get; set; }
+            public string StateJson { get; set; }
+
+            public AppState()
+            {
+                SessionId = Guid.NewGuid().ToString(); 
+            }
+        }
+        public class AppStateSting
+        {
+            public string StateJson { get; set; }
+        }
+
+
+        [HttpPost("saveState")]
+        public IActionResult SaveState([FromBody] AppStateSting stateJson) 
+        {
+            var appState = new AppState { StateJson = stateJson.StateJson }; 
+
+            using (var db = new LiteDatabase(_dbPath))
+            {
+                var states = db.GetCollection<AppState>("states");
+                states.Insert(appState);
+                return Ok(new { sessionId = appState.SessionId });
+            }
+        }
+
+
+        [HttpGet("getState/{sessionId}")]
+        public IActionResult GetState(string sessionId)
+        {
+            using (var db = new LiteDatabase(_dbPath))
+            {
+                var states = db.GetCollection<AppState>("states");
+                var state = states.FindOne(s => s.SessionId == sessionId);
+                if (state == null)
+                {
+                    return NotFound();
+                }
+                return Ok(state.StateJson);
+            }
+        }
+
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadFile(IFormFile file, [FromForm] bool isAccessLog)
+        public async Task<IActionResult> UploadFile(IFormFile file, [FromForm] bool isAccessLog, [FromForm] string startTime, [FromForm] string endTime)
         {
             if (file == null || file.Length == 0)
             {
@@ -28,21 +74,21 @@ namespace LogReaderBackend.Controllers
 
             try
             {
-                if (isAccessLog)
+                using (var stream = file.OpenReadStream())
                 {
-  
-                     var result = _logProcessingService.ReadAccessLog(file, true);
+                    object result;
+                    if (isAccessLog)
+                    {
+                        result = await _logProcessingService.ReadAccessLogAsync(stream,true, startTime, endTime);
+                    }
+                    else
+                    {
+                        result = await _logProcessingService.ReadErrorLogAsync(stream, true, startTime, endTime);
+                    }
                     var json = JsonConvert.SerializeObject(result);
+                    Console.WriteLine(json);
                     return Ok(json);
                 }
-                else
-                {
-                    
-                     var result = _logProcessingService.ReadErrorLog(file, true);
-                    var json = JsonConvert.SerializeObject(result);
-                    return Ok(json);
-                }
-                
 
             }
             catch (Exception ex)

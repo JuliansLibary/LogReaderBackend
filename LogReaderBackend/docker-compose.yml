@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  logreaderbackend:
+    build: .
+    container_name: 'Logreader-Backend'
+    ports:
+      - "4001:4001"
+    networks:
+      - logreader-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+networks:
+  logreader-network:
+    name: logreader-network
