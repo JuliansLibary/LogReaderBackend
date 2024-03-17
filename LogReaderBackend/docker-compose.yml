@@ -5,10 +5,22 @@ services:
     container_name: 'Logreader-Backend'
     ports:
       - "4001:4001"
-    networks:
+    networks: 
       - logreader-network
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+  nginx:
+    image: nginx:latest
+    container_name: 'nginx-proxy'
+    ports:
+      - "80:80"  
+    volumes:
+      - ./nginx:/etc/nginx/conf.d  
+      - ./frontend/build:/usr/share/nginx/html  
+    depends_on:
+      - logreaderbackend
+    networks:
+      - logreader-network
 networks:
   logreader-network:
     name: logreader-network
