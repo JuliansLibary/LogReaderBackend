@@ -2,9 +2,11 @@
 using LogReaderBackend.Services; // Stellen Sie sicher, dass der Namespace korrekt ist
 using Newtonsoft.Json;
 using LiteDB;
+using Microsoft.AspNetCore.Cors;
 
 namespace LogReaderBackend.Controllers
 {
+    [EnableCors()]
     [Route("api/[controller]")]
     [ApiController]
     public class LogReaderController : ControllerBase
