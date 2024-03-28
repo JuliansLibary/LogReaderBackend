@@ -97,7 +97,6 @@ namespace LogReaderBackend.Services
                 });
 
                 readTask.Wait();
-                Console.WriteLine("Das ist der COunt" + contentCounts.Count());
                 var resultList = contentCounts
             .OrderByDescending(pair => pair.Value)
             .Select(pair => new PostAccessContent(pair.Key.SID, pair.Key.RequestContent, pair.Key.RequestType, pair.Key.NodeId,pair.Value))
