@@ -3,6 +3,7 @@ using LogReaderBackend.Services; // Stellen Sie sicher, dass der Namespace korre
 using Newtonsoft.Json;
 using LiteDB;
 using Microsoft.AspNetCore.Cors;
+using System.IO.Compression;
 
 namespace LogReaderBackend.Controllers
 {
@@ -76,28 +77,29 @@ namespace LogReaderBackend.Controllers
 
             try
             {
-                using (var stream = file.OpenReadStream())
+                using (var compressedStream = file.OpenReadStream())
+                using (var decompressedStream = new GZipStream(compressedStream, CompressionMode.Decompress))
                 {
                     object result;
                     if (isAccessLog)
                     {
-                        result = await _logProcessingService.ReadAccessLogAsync(stream,true, startTime, endTime);
+                        // Stellen Sie sicher, dass ReadAccessLogAsync und ReadErrorLogAsync Streams direkt verarbeiten können
+                        result = await _logProcessingService.ReadAccessLogAsync(decompressedStream, true, startTime, endTime);
                     }
                     else
                     {
-                        result = await _logProcessingService.ReadErrorLogAsync(stream, true, startTime, endTime);
+                        result = await _logProcessingService.ReadErrorLogAsync(decompressedStream, true, startTime, endTime);
                     }
                     var json = JsonConvert.SerializeObject(result);
-                    Console.WriteLine(json);
                     return Ok(json);
                 }
-
             }
             catch (Exception ex)
             {
                 return Problem(ex.Message);
             }
         }
+
 
     }
 }
