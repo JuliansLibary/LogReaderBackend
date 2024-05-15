@@ -54,17 +54,20 @@ namespace LogReaderBackend.Models
     // Abgeleitete Klasse AccessContent, die von Content erbt und das Attribut RequestType hinzufügt
     public class AccessContent : Content
     {
+        public string NodeId { get; set; }
         public string RequestType { get; set; }
 
-        public AccessContent(string sid, string requestContent, string requestType)
+        public AccessContent(string sid, string requestContent, string requestType, string nodeId)
             : base(sid, requestContent) // Aufruf des Basisklassenkonstruktors
         {
             RequestType = requestType;
+            this.NodeId = nodeId;
         }
-        public AccessContent(string requestContent, string requestType)
+        public AccessContent(string requestContent, string requestType, string nodeId)
     : base(requestContent) // Aufruf des Basisklassenkonstruktors
         {
             RequestType = requestType;
+            this.NodeId = nodeId;
         }
         public AccessContent() : base()
         {
@@ -136,5 +139,38 @@ namespace LogReaderBackend.Models
             return $"{base.ToString()}, Request Message: {RequestMessage}";
         }
     }
-  
+    public class PostAccessContent : AccessContent
+    {
+        public int Counter { get; set; }
+
+        public PostAccessContent(string sid, string requestContent, string requestType,string nodeId,  int counter)
+            : base(sid, requestContent, requestType, nodeId)
+        {
+            Counter = counter;
+        }
+
+        public PostAccessContent(string requestContent, string requestType, string nodeId, int counter)
+            : base(requestContent, requestType, nodeId)
+        {
+            Counter = counter;
+        }
+    }
+    public class PostErrorContent : ErrorContent
+    {
+        public int Counter { get; set; }
+
+        public PostErrorContent(string sid, string requestContent, string requestMessage, int counter)
+            : base(sid, requestContent, requestMessage)
+        {
+            Counter = counter;
+        }
+
+        public PostErrorContent(string requestContent, string requestMessage, int counter)
+            : base(requestContent, requestMessage)
+        {
+            Counter = counter;
+        }
+    }
+    // ganantiert, dass das Property, welches gechanged wurde immer im UI aktuell bleibt
+
 }

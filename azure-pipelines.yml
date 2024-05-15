@@ -1,0 +1,55 @@
+
+
+trigger:
+- master
+
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+
+    - task: NuGetToolInstaller@1
+      displayName: 'Install NuGet >=6.3.0-0'
+      inputs:
+        versionSpec: '>=6.3.0-0'
+        checkLatest: true
+    - task: NuGetCommand@2
+      inputs:
+        command: 'restore'
+        restoreSolution: '**/*.sln'
+        feedsToUse: 'select'
+        vstsFeed: 'f87eecda-7028-46c8-9591-14dbfead7ec6'
+    - task: DotNetCoreCLI@2
+      displayName: Publish Project
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '**/LogReaderBackend.csproj'
+        arguments: '-c release --no-restore'
+        zipAfterPublish: false
+        modifyOutputPath: false
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: '**/*'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'backend'
+        publishLocation: 'Container'
